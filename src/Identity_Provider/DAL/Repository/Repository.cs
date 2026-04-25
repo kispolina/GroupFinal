@@ -11,9 +11,9 @@ namespace DAL.Repository
 {
     public class Repository<T>: IRepository<T> where T : class
     {
-        public readonly LibraryContext _context;
+        public readonly AppDbContext _context;
         public readonly DbSet<T> _dbSet;
-        public Repository(LibraryContext context)
+        public Repository(AppDbContext context)
         {
             _context = context;
             _dbSet = context.Set<T>();  
