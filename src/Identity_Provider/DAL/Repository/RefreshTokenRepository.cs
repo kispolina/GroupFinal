@@ -13,14 +13,18 @@ namespace DAL.Repository
     {
         public RefreshTokenRepository(AppDbContext context):base(context) { }
 
-        public async Task<RefreshToken> GetByTokenAsync(string token)
+        public async Task<RefreshToken?> GetByTokenAsync(string token)
         {
-            return await _dbSet.Include(x => x.User).FirstOrDefaultAsync(rt => rt.Token == token);
+            return await _dbSet
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(rt => rt.Token == token);
         }
 
         public async Task RevokeAllUserTokenAsync(int userId)
         {
-            await _dbSet.Where(rt => rt.UserId == userId).ForEachAsync(rt => rt.IsRevoked = true);
+            await _dbSet
+                .Where(rt => rt.UserId == userId)
+                .ForEachAsync(rt => rt.IsRevoked = true);
         }
     }
 }
