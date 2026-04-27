@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Microsoft.AspNetCore.Http;
+using Azure.Core;
 
 namespace Identity_Provider.Controllers
 {
@@ -59,19 +60,14 @@ namespace Identity_Provider.Controllers
         [HttpPost("logout")]
         public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest refreshTokenRequest)
         {
-            var authHeader = Request.Headers[HeaderNames.Authorization].FirstOrDefault();
-            if (authHeader != null && authHeader.StartsWith("Bearer "))
-            {
-                var jwtToken = authHeader.Substring("Bearer ".Length).Trim();
-                blacklistService.Add(jwtToken);
-            }
+            var accessToken = HttpContext.Request.Headers.Authorization
+        .ToString().Replace("Bearer ", "");
+            var (success, message) = await authService.LogoutAsync(refreshTokenRequest.RefreshToken, accessToken);
 
-            var res = await authService.LogoutAsync(refreshTokenRequest.RefreshToken);
-            if (!res.Success)
-            {
-                return BadRequest(new { Message = res.Message });
-            }
-            return Ok(new { Message = res.Message });
+            if (!success)
+                return BadRequest(new { Message = message });
+
+            return Ok(new { Message = message });
         }
 
         [Authorize(Roles = "Admin")]
